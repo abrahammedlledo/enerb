@@ -1,0 +1,6 @@
+node_modules/
+temporary screenshots/
+*.bat
+*.ps1
+install-puppeteer.bat
+install.ps1
