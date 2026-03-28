@@ -53,7 +53,7 @@
         "alternateName": "EnerB Energía Solar",
         "description": "Empresa instaladora de paneles solares en Celaya, Guanajuato. Sistemas residenciales, industriales, comerciales y agropecuarios. Reducción de factura eléctrica hasta un 90%.",
         "url": "https://enerbmx.com",
-        "telephone": "+524611044739",
+        "telephone": "+524611834794",
         "email": "abraham.medlledo@gmail.com",
         "logo": "https://enerbmx.com/Brand%20Guidelines/EnerB.png",
         "image": "https://enerbmx.com/Brand%20Guidelines/EnerB.png",
@@ -359,19 +359,16 @@
   <section class="relative min-h-screen flex items-center overflow-hidden grain" style="background: #0D1F0D;">
 
     <!-- ── Fondo de vídeo en loop (Dron1 → Dron2 → Dron1 …) ── -->
-    <div class="absolute inset-0 pointer-events-none" style="z-index:0;">
+    <div id="hero-video-wrap" class="absolute inset-0 pointer-events-none" style="z-index:0; contain: layout style;">
       <video id="vid1" src="Videos/Dron1.mp4" muted playsinline preload="auto"
              class="absolute inset-0 w-full h-full object-cover"
-             style="opacity:0; transition: opacity 0.6s ease;"></video>
-      <video id="vid2" src="Videos/Dron2.mp4" muted playsinline preload="auto"
+             style="opacity:0; transition: opacity 0.6s ease; transform: translateZ(0); will-change: transform; backface-visibility: hidden;"></video>
+      <video id="vid2" src="Videos/Dron2.mp4" muted playsinline preload="none"
              class="absolute inset-0 w-full h-full object-cover"
-             style="opacity:0; transition: opacity 0.6s ease;"></video>
-      <!-- Overlay: oscurece + desenfoca levemente para no distraer al lector -->
-      <div class="absolute inset-0" style="
-        background: linear-gradient(160deg, rgba(13,31,13,0.62) 0%, rgba(13,36,62,0.58) 100%);
-        backdrop-filter: blur(1.5px);
-      "></div>
-      <!-- Mantiene el degradado de color de marca encima del vídeo -->
+             style="opacity:0; transition: opacity 0.6s ease; transform: translateZ(0); will-change: transform; backface-visibility: hidden;"></video>
+      <!-- Overlay oscuro sin backdrop-filter (era muy costoso en GPU) -->
+      <div class="absolute inset-0" style="background: linear-gradient(160deg, rgba(13,31,13,0.65) 0%, rgba(13,36,62,0.60) 100%);"></div>
+      <!-- Degradado de color de marca -->
       <div class="absolute inset-0 pointer-events-none" style="
         background:
           radial-gradient(ellipse 80% 60% at 70% 40%, rgba(66,165,245,0.10) 0%, transparent 65%),
@@ -383,33 +380,27 @@
     <script>
     (function(){
       var vids   = [document.getElementById('vid1'), document.getElementById('vid2')];
-      var cur    = 0;   // índice del vídeo activo
+      var cur    = 0;
       var switching = false;
+      var heroVisible = true;
 
       function show(el){ el.style.opacity = '1'; }
       function hide(el){ el.style.opacity = '0'; }
 
-      // Cambia al siguiente vídeo sin esperar el evento 'ended'
       function doSwitch(){
         if(switching) return;
         switching = true;
-
         var from = vids[cur];
         var to   = vids[(cur + 1) % 2];
-
         to.currentTime = 0;
-
         function startTo(){
           show(to);
-          // Ocultar el anterior tras el fade
           setTimeout(function(){ hide(from); from.pause(); }, 650);
           cur = (cur + 1) % 2;
-          // Armar el detector de cambio para el vídeo que acaba de empezar
           attachSwitch(to);
           setTimeout(function(){ switching = false; }, 700);
         }
-
-        if(to.readyState >= 3){          // HAVE_FUTURE_DATA — listo para reproducir
+        if(to.readyState >= 3){
           to.play().then(startTo).catch(startTo);
         } else {
           to.load();
@@ -420,7 +411,6 @@
         }
       }
 
-      // Detecta el final ~0.5 s antes usando timeupdate (más fiable que 'ended')
       function attachSwitch(v){
         v.addEventListener('timeupdate', function check(){
           if(!v.duration) return;
@@ -429,28 +419,38 @@
             doSwitch();
           }
         });
-        // Respaldo: si 'ended' llega de todas formas, cambiar también
         v.addEventListener('ended', function onEnd(){
           v.removeEventListener('ended', onEnd);
           doSwitch();
         });
       }
 
-      // Arrancar el primero
-      vids[1].load(); // pre-cargar el segundo mientras corre el primero
-
       function startFirst(){
         vids[0].play().then(function(){
           show(vids[0]);
           attachSwitch(vids[0]);
         }).catch(function(){
-          // Si autoplay bloqueado, reintentar al primer clic/toque
           document.addEventListener('click', function retry(){
             document.removeEventListener('click', retry);
             vids[0].play().then(function(){ show(vids[0]); attachSwitch(vids[0]); }).catch(function(){});
           }, { once: true });
         });
       }
+
+      // IntersectionObserver: pausa cuando el hero sale de vista, reanuda al volver
+      var heroSection = document.getElementById('hero-video-wrap').parentElement.parentElement;
+      var observer = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          heroVisible = entry.isIntersecting;
+          if(heroVisible){
+            vids[cur].play().catch(function(){});
+          } else {
+            vids[0].pause();
+            vids[1].pause();
+          }
+        });
+      }, { threshold: 0.05 });
+      observer.observe(heroSection);
 
       if(vids[0].readyState >= 3){
         startFirst();
@@ -579,23 +579,18 @@
   <div class="bg-white border-b border-sand-200 py-5">
     <div class="max-w-6xl mx-auto px-6 flex flex-wrap items-center justify-center gap-8 md:gap-16">
       <div class="flex items-center gap-3">
-        <span class="text-2xl">☀️</span>
+        <i data-lucide="home" style="width:32px;height:32px;stroke:#2d6a4f;stroke-width:1.75;flex-shrink:0"></i>
         <div><div class="font-display font-bold text-leaf text-lg leading-none">Residencial</div><div class="text-ink/45 text-xs mt-0.5">Hogares y familias</div></div>
       </div>
       <div class="hidden md:block w-px h-8 bg-sand-200"></div>
       <div class="flex items-center gap-3">
-        <span class="text-2xl">🏭</span>
+        <i data-lucide="factory" style="width:32px;height:32px;stroke:#2d6a4f;stroke-width:1.75;flex-shrink:0"></i>
         <div><div class="font-display font-bold text-leaf text-lg leading-none">Industrial</div><div class="text-ink/45 text-xs mt-0.5">Bodegas y empresas</div></div>
       </div>
       <div class="hidden md:block w-px h-8 bg-sand-200"></div>
       <div class="flex items-center gap-3">
-        <span class="text-2xl">🍽️</span>
+        <i data-lucide="store" style="width:32px;height:32px;stroke:#2d6a4f;stroke-width:1.75;flex-shrink:0"></i>
         <div><div class="font-display font-bold text-leaf text-lg leading-none">Comercial</div><div class="text-ink/45 text-xs mt-0.5">Restaurantes y negocios</div></div>
-      </div>
-      <div class="hidden md:block w-px h-8 bg-sand-200"></div>
-      <div class="flex items-center gap-3">
-        <span class="text-2xl">🌱</span>
-        <div><div class="font-display font-bold text-leaf text-lg leading-none">Agropecuario</div><div class="text-ink/45 text-xs mt-0.5">Ranchos y campo</div></div>
       </div>
     </div>
   </div>
@@ -620,37 +615,49 @@
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Card 1 -->
         <div class="fade-up delay-1 bg-white rounded-2xl p-7 shadow-card hover:shadow-card-hover hover:-translate-y-1.5 transition-all duration-300 group cursor-default">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-5 bg-amber-light group-hover:scale-110 transition-transform duration-300">💡</div>
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-amber-light group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="lightbulb" style="width:26px;height:26px;stroke:#2d6a4f;stroke-width:1.75"></i>
+          </div>
           <h3 class="font-display font-semibold text-ink text-lg mb-2">Asesoría personalizada</h3>
           <p class="text-ink/55 text-sm leading-relaxed">Analizamos tu consumo y diseñamos el sistema exacto que necesitas, sin pagar de más.</p>
         </div>
         <!-- Card 2 -->
         <div class="fade-up delay-2 bg-white rounded-2xl p-7 shadow-card hover:shadow-card-hover hover:-translate-y-1.5 transition-all duration-300 group cursor-default">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-5 bg-leaf-100 group-hover:scale-110 transition-transform duration-300">⚡</div>
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-leaf-100 group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="hammer" style="width:26px;height:26px;stroke:#2d6a4f;stroke-width:1.75"></i>
+          </div>
           <h3 class="font-display font-semibold text-ink text-lg mb-2">Instalación profesional</h3>
           <p class="text-ink/55 text-sm leading-relaxed">Técnicos certificados garantizan una instalación segura y eficiente en 1–2 días.</p>
         </div>
         <!-- Card 3 -->
         <div class="fade-up delay-3 bg-white rounded-2xl p-7 shadow-card hover:shadow-card-hover hover:-translate-y-1.5 transition-all duration-300 group cursor-default">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-5 bg-solar/10 group-hover:scale-110 transition-transform duration-300">🌱</div>
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-solar/10 group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="zap" style="width:26px;height:26px;stroke:#2d6a4f;stroke-width:1.75"></i>
+          </div>
           <h3 class="font-display font-semibold text-ink text-lg mb-2">Paneles de alta eficiencia</h3>
           <p class="text-ink/55 text-sm leading-relaxed">Tecnología de primera clase que maximiza la generación incluso en días nublados.</p>
         </div>
         <!-- Card 4 -->
         <div class="fade-up delay-4 bg-white rounded-2xl p-7 shadow-card hover:shadow-card-hover hover:-translate-y-1.5 transition-all duration-300 group cursor-default">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-5 bg-leaf-100 group-hover:scale-110 transition-transform duration-300">🔧</div>
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-leaf-100 group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="wrench" style="width:26px;height:26px;stroke:#2d6a4f;stroke-width:1.75"></i>
+          </div>
           <h3 class="font-display font-semibold text-ink text-lg mb-2">Mantenimiento incluido</h3>
-          <p class="text-ink/55 text-sm leading-relaxed">Plan de mantenimiento preventivo para que tu sistema opere siempre al 100%.</p>
+          <p class="text-ink/55 text-sm leading-relaxed">Incluimos el primer mantenimiento completamente gratis después de tu instalación, para que tu sistema arranque al 100%.</p>
         </div>
         <!-- Card 5 -->
         <div class="fade-up delay-5 bg-white rounded-2xl p-7 shadow-card hover:shadow-card-hover hover:-translate-y-1.5 transition-all duration-300 group cursor-default">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-5 bg-amber-light group-hover:scale-110 transition-transform duration-300">📊</div>
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-amber-light group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="monitor-dot" style="width:26px;height:26px;stroke:#2d6a4f;stroke-width:1.75"></i>
+          </div>
           <h3 class="font-display font-semibold text-ink text-lg mb-2">Monitoreo en tiempo real</h3>
           <p class="text-ink/55 text-sm leading-relaxed">Consulta desde tu celular cuánta energía estás generando y ahorrando cada día.</p>
         </div>
         <!-- Card 6 -->
         <div class="fade-up delay-6 bg-white rounded-2xl p-7 shadow-card hover:shadow-card-hover hover:-translate-y-1.5 transition-all duration-300 group cursor-default">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-5 bg-solar/10 group-hover:scale-110 transition-transform duration-300">🤝</div>
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-solar/10 group-hover:scale-110 transition-transform duration-300">
+            <i data-lucide="shield-check" style="width:26px;height:26px;stroke:#2d6a4f;stroke-width:1.75"></i>
+          </div>
           <h3 class="font-display font-semibold text-ink text-lg mb-2">Garantía extendida</h3>
           <p class="text-ink/55 text-sm leading-relaxed">Hasta 25 años en paneles y 5 en instalación. Tu inversión protegida a largo plazo.</p>
         </div>
@@ -801,12 +808,12 @@
         <div class="fade-up delay-1 bg-white rounded-2xl p-7 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
           <div class="text-amber text-lg tracking-wider mb-4">★★★★★</div>
           <blockquote class="text-ink/70 text-sm leading-relaxed italic mb-6">
-            "Desde que instalé mis paneles con EnerB mi factura bajó de $2,800 a solo $180 al mes. El equipo fue muy profesional y cumplieron cada promesa."
+            "Desde que instalé mis paneles con EnerB mi factura bajó de $9,000 a solo $93 al mes. El equipo fue muy profesional y cumplieron cada promesa."
           </blockquote>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-leaf text-white font-display font-bold text-sm flex items-center justify-center flex-shrink-0">MR</div>
+            <div class="w-10 h-10 rounded-full bg-leaf text-white font-display font-bold text-sm flex items-center justify-center flex-shrink-0">LM</div>
             <div>
-              <div class="font-semibold text-ink text-sm">María Rodríguez</div>
+              <div class="font-semibold text-ink text-sm">Luis Macias</div>
               <div class="text-ink/45 text-xs">Celaya, Guanajuato</div>
             </div>
           </div>
@@ -829,12 +836,12 @@
         <div class="fade-up delay-3 bg-white rounded-2xl p-7 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
           <div class="text-amber text-lg tracking-wider mb-4">★★★★★</div>
           <blockquote class="text-ink/70 text-sm leading-relaxed italic mb-6">
-            "Al principio dudé, pero en cuatro meses recuperé parte de la inversión. EnerB me explicó todo con paciencia y sin presiones. ¡Muy recomendados!"
+            "Al principio dudé, pero en cuanto vi mis primeros recibos de luz, supe que invertí inteligentemente. EnerB me explicó todo con paciencia y sin presiones. ¡Muy recomendados!"
           </blockquote>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-amber text-ink font-display font-bold text-sm flex items-center justify-center flex-shrink-0">AL</div>
+            <div class="w-10 h-10 rounded-full bg-amber text-ink font-display font-bold text-sm flex items-center justify-center flex-shrink-0">LR</div>
             <div>
-              <div class="font-semibold text-ink text-sm">Ana Lucía Pérez</div>
+              <div class="font-semibold text-ink text-sm">Lorena Rebolledo</div>
               <div class="text-ink/45 text-xs">Celaya, Guanajuato</div>
             </div>
           </div>
@@ -885,7 +892,7 @@
 
         <!-- Bodega 2 (drone) -->
         <div class="fade-up delay-2 group relative rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1" style="aspect-ratio: 4/3;">
-          <img src="Casos de Éxito/Bodega2.png" alt="Vista aérea de bodega comercial con paneles solares fotovoltaicos en Celaya, Guanajuato"
+          <img src="Casos de Éxito/Bodega2.jpg" alt="Vista aérea de bodega comercial con paneles solares fotovoltaicos en Celaya, Guanajuato"
                class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(26,46,26,0.90) 0%, rgba(26,46,26,0.30) 55%, transparent 100%);"></div>
           <div class="absolute inset-0 bg-solar/10 mix-blend-multiply"></div>
@@ -950,7 +957,7 @@
 
         <!-- Restaurante -->
         <div class="fade-up delay-5 group relative rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1" style="aspect-ratio: 3/4;">
-          <img src="Casos de Éxito/Restaurante.png" alt="Restaurante con sistema solar comercial de 12 kW en azotea, Celaya, Guanajuato"
+          <img src="Casos de Éxito/Restaurante.jpg" alt="Restaurante con sistema solar comercial de 12 kW en azotea, Celaya, Guanajuato"
                class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(26,46,26,0.92) 0%, rgba(26,46,26,0.25) 50%, transparent 100%);"></div>
           <div class="absolute inset-0 bg-amber/5 mix-blend-multiply"></div>
@@ -1001,7 +1008,7 @@
                   active:translate-y-0 transition-all duration-200">
           Quiero mi cotización gratis
         </a>
-        <a href="tel:+524611044739"
+        <a href="tel:+524611834794"
            class="inline-flex items-center gap-2 text-white font-medium px-7 py-4 rounded-full border border-white/25
                   hover:bg-white/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
           📞 Llámanos ahora
@@ -1034,7 +1041,7 @@
           </div>
           <div class="flex items-center gap-4">
             <div class="w-11 h-11 rounded-xl bg-leaf-100 flex items-center justify-center text-lg flex-shrink-0">📞</div>
-            <a href="tel:+524611044739" class="text-ink/70 text-sm hover:text-leaf transition-colors duration-200">+52 (461) 104-4739</a>
+            <a href="tel:+524611834794" class="text-ink/70 text-sm hover:text-leaf transition-colors duration-200">+52 (461) 183-4794</a>
           </div>
           <div class="flex items-center gap-4">
             <div class="w-11 h-11 rounded-xl bg-leaf-100 flex items-center justify-center text-lg flex-shrink-0">✉️</div>
@@ -1112,19 +1119,6 @@
         <details class="fade-up delay-1 bg-white rounded-2xl shadow-card group" open>
           <summary class="flex items-center justify-between gap-4 px-7 py-5 cursor-pointer list-none select-none
                           hover:text-leaf transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf focus-visible:ring-inset rounded-2xl">
-            <span class="font-display font-semibold text-ink text-base">¿Cuánto cuesta instalar paneles solares en Celaya?</span>
-            <span class="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-full bg-leaf-100 text-leaf transition-transform duration-300 group-open:rotate-45">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            </span>
-          </summary>
-          <p class="px-7 pb-6 text-ink/60 text-sm leading-relaxed">
-            El costo varía según tu consumo eléctrico y el tamaño del sistema. Un sistema residencial básico parte desde <strong class="text-ink font-semibold">$60,000 MXN</strong>. Te ofrecemos cotización gratuita y personalizada en menos de 24 horas, sin compromiso.
-          </p>
-        </details>
-
-        <details class="fade-up delay-2 bg-white rounded-2xl shadow-card group">
-          <summary class="flex items-center justify-between gap-4 px-7 py-5 cursor-pointer list-none select-none
-                          hover:text-leaf transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf focus-visible:ring-inset rounded-2xl">
             <span class="font-display font-semibold text-ink text-base">¿En cuánto tiempo se recupera la inversión?</span>
             <span class="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-full bg-leaf-100 text-leaf transition-transform duration-300 group-open:rotate-45">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -1183,7 +1177,7 @@
             </span>
           </summary>
           <p class="px-7 pb-6 text-ink/60 text-sm leading-relaxed">
-            Sí, tenemos cobertura en toda la región Bajío: <strong class="text-ink font-semibold">Celaya, Silao, Irapuato, León, Salamanca</strong> y municipios cercanos de Guanajuato. Contáctanos para confirmar disponibilidad en tu zona.
+            Sí, tenemos cobertura en toda la región Bajío: <strong class="text-ink font-semibold">Celaya, Silao, Irapuato, León, Salamanca, San Miguel de Allende y Querétaro</strong>. Contáctanos para confirmar disponibilidad en tu zona.
           </p>
         </details>
 
@@ -1206,19 +1200,8 @@
         <div>
           <h4 class="text-white text-xs font-semibold tracking-widest uppercase mb-4">Empresa</h4>
           <ul class="flex flex-col gap-3">
-            <li><a href="#" class="text-white/45 text-sm hover:text-amber transition-colors duration-200">Nosotros</a></li>
-            <li><a href="#" class="text-white/45 text-sm hover:text-amber transition-colors duration-200">Proyectos</a></li>
-            <li><a href="#" class="text-white/45 text-sm hover:text-amber transition-colors duration-200">Blog</a></li>
-
-          </ul>
-        </div>
-        <div>
-          <h4 class="text-white text-xs font-semibold tracking-widest uppercase mb-4">Servicios</h4>
-          <ul class="flex flex-col gap-3">
-            <li><a href="#" class="text-white/45 text-sm hover:text-amber transition-colors duration-200">Paneles residenciales</a></li>
-            <li><a href="#" class="text-white/45 text-sm hover:text-amber transition-colors duration-200">Sistemas industriales</a></li>
-            <li><a href="#" class="text-white/45 text-sm hover:text-amber transition-colors duration-200">Mantenimiento</a></li>
-            <li><a href="#" class="text-white/45 text-sm hover:text-amber transition-colors duration-200">Monitoreo remoto</a></li>
+            <li><a href="nosotros.html" class="text-white/45 text-sm hover:text-amber transition-colors duration-200">Nosotros</a></li>
+            <li><a href="blog.html" class="text-white/45 text-sm hover:text-amber transition-colors duration-200">Blog</a></li>
           </ul>
         </div>
         <div>
@@ -1231,11 +1214,32 @@
       </div>
 
       <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-        <p class="text-white/30 text-xs">© 2026 EnerB · Albatros 228, Col. Los Álamos, Celaya, Guanajuato · <a href="tel:+524611044739" class="hover:text-amber transition-colors duration-200">+52 (461) 104-4739</a></p>
-        <div class="flex items-center gap-5">
-          <a href="https://instagram.com/enerbmx?igsh=MXFhMnB4OTNnYnQ3Mw==" target="_blank" rel="noopener" class="text-white/30 text-xs hover:text-amber transition-colors duration-200">Instagram</a>
-          <a href="https://facebook.com/EnergiasBajio" target="_blank" rel="noopener" class="text-white/30 text-xs hover:text-amber transition-colors duration-200">Facebook</a>
-          <a href="#" class="text-white/30 text-xs hover:text-amber transition-colors duration-200">WhatsApp</a>
+        <p class="text-white/30 text-xs">© 2026 EnerB · Albatros 228, Col. Los Álamos, Celaya, Guanajuato · <a href="tel:+524611834794" class="hover:text-amber transition-colors duration-200">+52 (461) 183-4794</a></p>
+        <div class="flex items-center gap-4">
+          <!-- Instagram -->
+          <a href="https://instagram.com/enerbmx?igsh=MXFhMnB4OTNnYnQ3Mw==" target="_blank" rel="noopener"
+             class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
+             style="background: rgba(255,255,255,0.08);" aria-label="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FA645" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </a>
+          <!-- Facebook -->
+          <a href="https://facebook.com/EnergiasBajio" target="_blank" rel="noopener"
+             class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
+             style="background: rgba(255,255,255,0.08);" aria-label="Facebook">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FA645" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <!-- WhatsApp -->
+          <a href="https://wa.me/+524611834794" target="_blank" rel="noopener"
+             class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
+             style="background: rgba(255,255,255,0.08);" aria-label="WhatsApp">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#4FA645">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.103 1.523 5.824L.057 23.882l6.198-1.458A11.937 11.937 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.659-.52-5.168-1.424l-.371-.22-3.678.865.929-3.58-.241-.389A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+            </svg>
+          </a>
         </div>
       </div>
     </div>
@@ -1327,5 +1331,9 @@
       }, 3000)
     }
   </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>lucide.createIcons()</script>
 </body>
 </html>

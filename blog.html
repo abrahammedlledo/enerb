@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — EnerB | Energía Solar en Celaya, Guanajuato</title>
+  <meta name="description" content="Artículos, guías y consejos sobre energía solar, ahorro eléctrico y paneles solares en Celaya, Guanajuato y el Bajío." />
+  <link rel="icon" type="image/png" href="Brand Guidelines/EnerB.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            leaf:  { DEFAULT: '#4FA645', dark: '#2E7D32', 50: '#F0F9EF', 100: '#DCF0DA' },
+            solar: { DEFAULT: '#42A5F5', dark: '#1565C0' },
+            amber: { DEFAULT: '#F9A825', dark: '#F57F17', light: '#FFF8E1' },
+            ink:   { DEFAULT: '#1A2E1A', 700: '#2D4A2D', 500: '#4A6B4A' },
+            sand:  { DEFAULT: '#F7F4EE', 100: '#EEF7EC', 200: '#D8EBD6' },
+          },
+          fontFamily: {
+            display: ['Fraunces', 'Georgia', 'serif'],
+            body:    ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'card':      '0 1px 2px rgba(26,46,26,.04), 0 4px 16px -2px rgba(26,46,26,.08)',
+            'card-hover':'0 2px 4px rgba(26,46,26,.04), 0 12px 36px -4px rgba(26,46,26,.14)',
+          },
+        },
+      },
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body class="font-body bg-sand text-ink antialiased">
+
+  <!-- NAV -->
+  <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-sand-200">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="index.html">
+        <img src="Brand Guidelines/EnerB.png" alt="EnerB" class="h-9" />
+      </a>
+      <a href="index.html" class="inline-flex items-center gap-2 text-sm font-medium text-ink/70 hover:text-leaf transition-colors duration-200">
+        <i data-lucide="arrow-left" style="width:16px;height:16px;stroke:currentColor"></i>
+        Volver al inicio
+      </a>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <section class="py-20 lg:py-28" style="background:#0D1F0D;">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+      <div class="inline-block bg-white/10 text-white/70 text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full mb-6">
+        Blog EnerB
+      </div>
+      <h1 class="font-display font-bold text-white mb-4" style="font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -0.03em;">
+        Todo sobre energía solar
+      </h1>
+      <p class="text-white/55 leading-relaxed text-lg">
+        Guías, consejos y novedades sobre paneles solares para que tomes la mejor decisión para tu hogar o negocio.
+      </p>
+    </div>
+  </section>
+
+  <!-- ARTÍCULOS -->
+  <section class="py-20">
+    <div class="max-w-6xl mx-auto px-6">
+
+      <!-- Próximamente -->
+      <div class="text-center py-24 bg-white rounded-3xl shadow-card">
+        <div class="w-16 h-16 rounded-2xl bg-leaf-100 flex items-center justify-center mx-auto mb-6">
+          <i data-lucide="pencil-line" style="width:28px;height:28px;stroke:#2d6a4f;stroke-width:1.75"></i>
+        </div>
+        <h2 class="font-display font-bold text-ink text-2xl mb-3">Artículos próximamente</h2>
+        <p class="text-ink/55 text-sm leading-relaxed max-w-sm mx-auto mb-8">
+          Estamos preparando contenido útil sobre energía solar, ahorro en la factura de luz y novedades del sector. Vuelve pronto.
+        </p>
+        <a href="index.html#contacto"
+           class="inline-flex items-center gap-2 bg-leaf text-white font-semibold px-6 py-3 rounded-full hover:-translate-y-0.5 transition-all duration-200 text-sm"
+           style="box-shadow: 0 4px 14px -2px rgba(79,166,69,.35);">
+          Solicitar cotización gratis
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER SIMPLE -->
+  <footer class="bg-ink py-8 mt-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <p class="text-white/30 text-xs">© 2026 EnerB · Celaya, Guanajuato</p>
+      <a href="index.html" class="text-white/30 text-xs hover:text-amber transition-colors duration-200">Volver al inicio</a>
+    </div>
+  </footer>
+
+  <script>lucide.createIcons()</script>
+</body>
+</html>
